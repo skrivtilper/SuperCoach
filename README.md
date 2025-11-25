@@ -122,5 +122,5 @@ Nu kan din GPT læse din aktivitet og skrive træninger til intervals, der synkr
 Det er kun fantasien der sætter grænser. Den kan også ændre, flytte og slette aktiviteter.
 I den version vi har oprettet her kan den ikke skrive i den langsigtede plan (selvom den tror det). Du kan bede den tage planen i canvas, og rette i den. Men du skal selv uploade en ny kopi og fjerne den gamle.
 
-Dem med falkeøje vil se at der allerede er integration til GitHub på vej i filerne. Planen er at lægge den langsigtede plan i et private repository og lade GPT'en læse og skrive til den der.
+Dem med falkeøje vil se at der allerede er integration til GitHub på vej i filerne. Planen er at lægge den langsigtede plan i et private repository og lade GPT'en læse og skrive til den der. https://github.com/skrivtilper/SuperCoach/issues/1
 Jeg overvejer også at lægge korttidshukommelsen i GitHub i stedet for noterne i intervals.
