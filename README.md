@@ -7,7 +7,7 @@ Denne guide forklarer, hvordan du opretter din egen **Pers supercoach** — en G
 ## 📋 Overblik
 
 **Pers supercoach** kan:
-- Læse og følge din langsigtede plan fra `maal_og_langsigtet_plan.md`
+- Læse og følge din langsigtede plan.
 - Synkronisere og opdatere træningspas via **Intervals.icu API**
 - Logge strukturerede NOTE-hændelser for beslutninger, evalueringer og ugeplaner
 - Automatisk justere belastning baseret på wellness- og træningsdata
@@ -41,12 +41,10 @@ Denne guide forklarer, hvordan du opretter din egen **Pers supercoach** — en G
 
 ## 🧩 Trin 3 — Tilføj adfærdsbeskrivelsen
 
-1. Gå til fanen **Konfigurer / Instruktioner**.  
-2. Indsæt indholdet fra instruksen
+- Indsæt indholdet fra instruksen under **Instructions**
 ```
 https://github.com/skrivtilper/SuperCoach/blob/main/Instruks.md
 ```
-4. Gem ændringerne.
 
 ---
 
@@ -57,7 +55,7 @@ Du kan bruge min skabelon som du finder her:
 ```
 https://github.com/skrivtilper/SuperCoach/blob/c21f34f90b913f62461f4c9d08beb4563a8ec22e/maal_og_langsigtet_plan.md
 ```
-Men du skal selvfølgelig lave din egen plan. Hvis ikke du har en kan chatGPT hurtigt lave et udkast. Når Supercoachen er i gang tilpasser du selvfølgelig planen i dialog, så den passer til dine mål, din træningshistorik og din form.
+Men du skal selvfølgelig lave din egen plan. Hvis ikke du har en kan chatGPT hurtigt lave et udkast, det gjorde jeg. Når Supercoachen er i gang tilpasser du selvfølgelig planen i dialog, så den passer til dine mål, din træningshistorik og din form.
 
 | Fil | Formål |
 |------|--------|
@@ -70,8 +68,8 @@ Når filen er uploadet, ligger den i GPT’ens miljø som:
 
 ## 🔌 Trin 5 — Opret Intervals.icu-handlinger
 
-Brug fanen **Handlinger (Actions)** til at forbinde GPT’en med Intervals.icu API’et.  
-Hver handling bruger din **personlige API-nøgle**
+Brug **Handlinger (Actions)** til at forbinde GPT’en med Intervals.icu API’et.  
+Hver handling bruger din **personlige API-nøgle** *Se nedenfor
 
 Indsæt indholdet fra openAPI intervals_icu.yaml eller *Import from URL* med dette link 
 ```
