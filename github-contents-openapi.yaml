@@ -1,0 +1,242 @@
+openapi: 3.1.0
+info:
+  title: GitHub Contents API (Read & Commit) for Custom GPT
+  version: "1.0.0"
+  description: |
+    Minimal GitHub REST API surface for reading and updating files in a repository.
+    - Auth: HTTP Bearer using a Personal Access Token (PAT) with repo:contents scope.
+    - Primary endpoints:
+      * GET /repos/{owner}/{repo}/contents/{path}  (read file, base64 content in JSON)
+      * PUT /repos/{owner}/{repo}/contents/{path}  (create/update with commit)
+      * GET /repos/{owner}/{repo}/commits          (history for a path)
+      * GET /repos/{owner}/{repo}                  (metadata incl. default_branch)
+servers:
+  - url: https://api.github.com
+
+components:
+  securitySchemes:
+    githubBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: GitHub PAT (repo:contents)
+
+  schemas:
+    CommitUser:
+      type: object
+      additionalProperties: true
+      properties:
+        name: { type: string }
+        email: { type: string }
+
+    ContentFile:
+      type: object
+      additionalProperties: true
+      properties:
+        type: { type: string, description: "file/dir/submodule/symlink" }
+        name: { type: string }
+        path: { type: string }
+        sha:  { type: string }
+        size: { type: integer }
+        encoding: { type: string, description: "base64 when content is present" }
+        content: { type: string, description: "base64-encoded file content" }
+        url: { type: string }
+        html_url: { type: string }
+        download_url: { type: string }
+
+    CreateOrUpdateFileRequest:
+      type: object
+      required: [message, content]
+      properties:
+        message:
+          type: string
+          description: "Commit message"
+        content:
+          type: string
+          description: "Base64-encoded new file content"
+        sha:
+          type: string
+          description: "Blob SHA of the file being replaced (required for update; omit to create)"
+        branch:
+          type: string
+          description: "Target branch (defaults to repository default_branch)"
+        committer:
+          $ref: '#/components/schemas/CommitUser'
+        author:
+          $ref: '#/components/schemas/CommitUser'
+
+    CreateOrUpdateFileResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        content:
+          $ref: '#/components/schemas/ContentFile'
+        commit:
+          type: object
+          additionalProperties: true
+          properties:
+            sha: { type: string }
+            html_url: { type: string }
+            message: { type: string }
+
+    Repo:
+      type: object
+      additionalProperties: true
+      properties:
+        full_name: { type: string }
+        default_branch: { type: string }
+
+    CommitSummary:
+      type: object
+      additionalProperties: true
+      properties:
+        sha: { type: string }
+        html_url: { type: string }
+        commit:
+          type: object
+          additionalProperties: true
+          properties:
+            author:
+              type: object
+              additionalProperties: true
+              properties:
+                name: { type: string }
+                email: { type: string }
+                date: { type: string, format: date-time }
+            committer:
+              type: object
+              additionalProperties: true
+              properties:
+                name: { type: string }
+                email: { type: string }
+                date: { type: string, format: date-time }
+            message: { type: string }
+
+security:
+  - githubBearer: []
+
+paths:
+  /repos/{owner}/{repo}/contents/{path}:
+    get:
+      operationId: getFileContents
+      summary: Read a file (JSON with base64 content)
+      parameters:
+        - in: path
+          name: owner
+          required: true
+          schema: { type: string }
+        - in: path
+          name: repo
+          required: true
+          schema: { type: string }
+        - in: path
+          name: path
+          required: true
+          schema: { type: string }
+        - in: query
+          name: ref
+          required: false
+          schema: { type: string }
+          description: "The name of the commit/branch/tag (defaults to default_branch)"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentFile'
+    put:
+      operationId: putFileContents
+      summary: Create or update file contents (commit)
+      parameters:
+        - in: path
+          name: owner
+          required: true
+          schema: { type: string }
+        - in: path
+          name: repo
+          required: true
+          schema: { type: string }
+        - in: path
+          name: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrUpdateFileRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrUpdateFileResponse'
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrUpdateFileResponse'
+
+  /repos/{owner}/{repo}:
+    get:
+      operationId: getRepo
+      summary: Get repository metadata (default_branch)
+      parameters:
+        - in: path
+          name: owner
+          required: true
+          schema: { type: string }
+        - in: path
+          name: repo
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repo'
+
+  /repos/{owner}/{repo}/commits:
+    get:
+      operationId: listCommitsForPath
+      summary: List commits touching a path
+      parameters:
+        - in: path
+          name: owner
+          required: true
+          schema: { type: string }
+        - in: path
+          name: repo
+          required: true
+          schema: { type: string }
+        - in: query
+          name: path
+          required: false
+          schema: { type: string }
+        - in: query
+          name: sha
+          required: false
+          schema: { type: string }
+          description: "Commit SHA or branch to start listing from"
+        - in: query
+          name: per_page
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 30 }
+        - in: query
+          name: page
+          required: false
+          schema: { type: integer, minimum: 1, default: 1 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommitSummary'
