@@ -1,0 +1,479 @@
+openapi: 3.1.0
+info:
+  title: Intervals.icu Training Assistant
+  version: 1.4.1
+servers:
+  - url: https://intervals.icu
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    Event:
+      type: object
+      additionalProperties: true
+      required:
+        - category
+        - start_date_local
+      properties:
+        id:
+          type: integer
+        category:
+          type: string
+          enum:
+            - WORKOUT
+            - NOTE
+        type:
+          type: string
+          description: Sport, fx Run/Ride (WORKOUT)
+        name:
+          type: string
+        start_date_local:
+          type: string
+          format: date-time
+        end_date_local:
+          type: string
+          format: date-time
+        description:
+          type: string
+        external_id:
+          type: string
+          description: Idempotens for planlagte pas
+        paired_event_id:
+          type: integer
+          description: Parret gennemført aktivitet
+    CreateEventRequest:
+      type: object
+      additionalProperties: true
+      required:
+        - start_date_local
+        - category
+        - description
+      properties:
+        start_date_local:
+          type: string
+          format: date-time
+        end_date_local:
+          type: string
+          format: date-time
+        category:
+          type: string
+          enum:
+            - WORKOUT
+            - NOTE
+        type:
+          type: string
+          description: Sport (kræves normalt for WORKOUT)
+        name:
+          type: string
+        description:
+          type: string
+        external_id:
+          type: string
+          description: Idempotens
+    UpdateEventRequest:
+      type: object
+      additionalProperties: true
+      properties:
+        start_date_local:
+          type: string
+          format: date-time
+        end_date_local:
+          type: string
+          format: date-time
+        category:
+          type: string
+          enum:
+            - WORKOUT
+            - NOTE
+        type:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        external_id:
+          type: string
+    EventList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Event"
+    Activity:
+      type: object
+      additionalProperties: true
+      required:
+        - id
+        - sport
+        - start_date_local
+      properties:
+        id:
+          type: integer
+        sport:
+          type: string
+        start_date_local:
+          type: string
+          format: date-time
+        elapsed_time:
+          type: integer
+          description: Sekunder
+        moving_time:
+          type: integer
+          description: Sekunder
+        distance:
+          type: number
+          description: Meter
+        avg_hr:
+          type: number
+        paired_event_id:
+          type: integer
+    ActivityList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Activity"
+    AthleteProfile:
+      type: object
+      description: Grunddata for atleten (nogle felter kan mangle)
+      additionalProperties: true
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        sex:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        age:
+          type: integer
+        height_cm:
+          type: number
+        weight_kg:
+          type: number
+        max_hr:
+          type: integer
+        resting_hr:
+          type: integer
+        ftp:
+          type: number
+          description: Watt (cykling) hvis sat
+        thresholds:
+          type: object
+          additionalProperties: true
+        zones:
+          type: object
+          additionalProperties: true
+    Wellness:
+      type: object
+      description: Daglig wellness (nøglefelter; øvrige tillades).
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+          description: Dato (YYYY-MM-DD)
+        weight:
+          type: number
+          format: float
+        restingHR:
+          type: number
+          format: float
+        sleepSecs:
+          type: integer
+          description: Søvn (sekunder)
+        sleepScore:
+          type: number
+          format: float
+        sleepQuality:
+          type: number
+          format: float
+        fatigue:
+          type: number
+          format: float
+        soreness:
+          type: number
+          format: float
+        stress:
+          type: number
+          format: float
+        motivation:
+          type: number
+          format: float
+        comments:
+          type: string
+    WellnessBulkUpsertRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Wellness"
+      required:
+        - items
+    AthleteTrainingPlan:
+      type: object
+      description: Atletens tilknyttede training plan + metadata
+      additionalProperties: true
+      properties:
+        athlete_id:
+          type: string
+        training_plan_id:
+          type: integer
+          format: int32
+          description: Eksisterende plan-ID i Intervals, hvis sat
+        training_plan_start_date:
+          type: string
+          description: YYYY-MM-DD
+        timezone:
+          type: string
+        training_plan_last_applied:
+          type: string
+          format: date-time
+        training_plan:
+          type: object
+          additionalProperties: true
+          description: Plan-struktur (som returneret af Intervals)
+        training_plan_alias:
+          type: string
+    AthleteTrainingPlanUpdate:
+      type: object
+      description: Sæt/ændr atletens training plan-tilknytning
+      additionalProperties: true
+      properties:
+        training_plan_id:
+          type: integer
+          format: int32
+          description: Eksisterende plan-ID (valgfri)
+        training_plan_start_date:
+          type: string
+          description: YYYY-MM-DD
+        training_plan_alias:
+          type: string
+security:
+  - basicAuth: []
+paths:
+  /api/v1/athlete/0/profile:
+    get:
+      operationId: getAthleteProfile
+      summary: Hent atletprofil
+      description: Returnerer profilfelter for atleten bundet til API-nøglen.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AthleteProfile"
+  /api/v1/athlete/0/events:
+    get:
+      operationId: listEvents
+      summary: Hent events i dato-interval
+      description: WORKOUT/NOTE. Brug Europe/Copenhagen.
+      parameters:
+        - in: query
+          name: oldest
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Startdato (YYYY-MM-DD)
+        - in: query
+          name: newest
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Slutdato (YYYY-MM-DD)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventList"
+    post:
+      operationId: createEvent
+      summary: Opret WORKOUT/NOTE
+      description: Brug external_id for idempotens.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEventRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+  /api/v1/athlete/0/events/{eventId}:
+    put:
+      operationId: updateEvent
+      summary: Opdater event
+      description: Flyt tidspunkt/ret beskrivelse.
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEventRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+    delete:
+      operationId: deleteEvent
+      summary: Slet event
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+  /api/v1/athlete/0/activities:
+    get:
+      operationId: listActivities
+      summary: Hent gennemførte aktiviteter
+      description: Match plan via paired_event_id.
+      parameters:
+        - in: query
+          name: oldest
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Startdato (YYYY-MM-DD)
+        - in: query
+          name: newest
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Slutdato (YYYY-MM-DD)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityList"
+  /api/v1/athlete/0/wellness/{date}:
+    get:
+      operationId: getWellnessByDate
+      summary: Hent wellness for en dato
+      parameters:
+        - in: path
+          name: date
+          required: true
+          schema:
+            type: string
+          description: YYYY-MM-DD
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wellness"
+    put:
+      operationId: upsertWellnessByDate
+      summary: Opret eller opdater wellness for en dato (upsert)
+      parameters:
+        - in: path
+          name: date
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Wellness"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wellness"
+  /api/v1/athlete/0/wellness-bulk:
+    put:
+      operationId: upsertWellnessBulk
+      summary: Batch-opret/opdater flere wellness-dage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WellnessBulkUpsertRequest"
+      responses:
+        "200":
+          description: OK
+  /api/v1/athlete/0/wellness:
+    put:
+      operationId: upsertWellness
+      summary: Opret/opdater wellness (dato i body `id=YYYY-MM-DD`)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Wellness"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wellness"
+  /api/v1/athlete/0/training-plan:
+    get:
+      operationId: getAthleteTrainingPlan
+      summary: Hent atletens training plan-tilknytning
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AthleteTrainingPlan"
+    put:
+      operationId: setAthleteTrainingPlan
+      summary: Sæt/ændr atletens training plan (opret tilknytning hvis ingen)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AthleteTrainingPlanUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AthleteTrainingPlan"
