@@ -292,6 +292,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/EventList"
     post:
+      x-openai-isConsequential: false
       operationId: createEvent
       summary: Opret WORKOUT/NOTE
       description: Brug external_id for idempotens.
@@ -310,6 +311,7 @@ paths:
                 $ref: "#/components/schemas/Event"
   /api/v1/athlete/0/events/{eventId}:
     put:
+      x-openai-isConsequential: false
       operationId: updateEvent
       summary: Opdater event
       description: Flyt tidspunkt/ret beskrivelse.
@@ -333,6 +335,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Event"
     delete:
+      x-openai-isConsequential: false
       operationId: deleteEvent
       summary: Slet event
       parameters:
@@ -399,6 +402,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Wellness"
     put:
+      x-openai-isConsequential: false
       operationId: upsertWellnessByDate
       summary: Opret eller opdater wellness for en dato (upsert)
       parameters:
@@ -422,6 +426,7 @@ paths:
                 $ref: "#/components/schemas/Wellness"
   /api/v1/athlete/0/wellness-bulk:
     put:
+      x-openai-isConsequential: false
       operationId: upsertWellnessBulk
       summary: Batch-opret/opdater flere wellness-dage
       requestBody:
@@ -435,6 +440,7 @@ paths:
           description: OK
   /api/v1/athlete/0/wellness:
     put:
+      x-openai-isConsequential: false
       operationId: upsertWellness
       summary: Opret/opdater wellness (dato i body `id=YYYY-MM-DD`)
       requestBody:
@@ -462,6 +468,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/AthleteTrainingPlan"
     put:
+      x-openai-isConsequential: false
       operationId: setAthleteTrainingPlan
       summary: Sæt/ændr atletens training plan (opret tilknytning hvis ingen)
       requestBody:
