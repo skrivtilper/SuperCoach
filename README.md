@@ -1,2 +1,2 @@
 # SuperCoach
-Fitness / running coach GPT with integrations to intervals.icu and long term memory in knowledge sources.
+Fitness / running coach GPT med integration til intervals.icu og langtidshukommelse i knowledge kilder.
