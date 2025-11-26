@@ -104,7 +104,7 @@ Nøglen skal *encodes* som base64. Det er meget lettere end det lyder.
 Der er masser af online tjenester der kan klare det, jeg bruger: https://www.base64encode.org/
 Værdien der skal encodes er:
 ```
-basic <Din API key>
+basic <API_KEY:Din API key>
 ```
 For eksempel: "basic uieyviu9o7459o8looi4vway"
 Det sætter du ind i det øverste felt.
