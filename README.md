@@ -34,7 +34,7 @@ Denne guide forklarer, hvordan du opretter din egen **Pers supercoach** — en G
 - **Navn:** `Din supercoach`  
 - **Beskrivelse:** `Sørger for at du kommer i superform.`  
 - **Profilbillede:** generér automatisk eller upload et enkelt, markant ikon (tema: udholdenhed/træner).
-- **Model:** GPT-5
+- **Model:** GPT-5.1
 - **Capabilities:** Web Search, Canvas, Code interpreter & Data Analysis
 
 ---
@@ -57,12 +57,7 @@ https://github.com/skrivtilper/SuperCoach/blob/c21f34f90b913f62461f4c9d08beb4563
 ```
 Men du skal selvfølgelig lave din egen plan. Hvis ikke du har en kan chatGPT hurtigt lave et udkast, det gjorde jeg. Når Supercoachen er i gang tilpasser du selvfølgelig planen i dialog, så den passer til dine mål, din træningshistorik og din form.
 
-| Fil | Formål |
-|------|--------|
-| `maal_og_langsigtet_plan.md` | Indeholder mål, faser og ugeplaner |
-
-Når filen er uploadet, ligger den i GPT’ens miljø som:  
-`/mnt/data/maal_og_langsigtet_plan.md`
+<img width="473" height="186" alt="image" src="https://github.com/user-attachments/assets/99f8b7a2-cfd1-4cae-a542-27b81d6a960c" />
 
 ---
 
