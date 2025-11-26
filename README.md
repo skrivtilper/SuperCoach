@@ -101,14 +101,15 @@ Under indstillinger scroller du ned til du ser **Udviklerindstillinger** og klik
 <img width="205" height="89" alt="image" src="https://github.com/user-attachments/assets/fb159a6f-67e8-4d38-a113-0367964b4740" />
 
 Nøglen skal *encodes* som base64. Det er meget lettere end det lyder.
-Der er masser af online tjenester der kan klare det, jeg bruger: https://www.base64encode.org/
+Der er masser af online tjenester der kan klare det, jeg bruger: [https://www.base64encode.org/](https://base64convert.cc/)
 Værdien der skal encodes er:
 ```
 basic <API_KEY:Din API key>
 ```
-For eksempel: "basic uieyviu9o7459o8looi4vway"
-Det sætter du ind i det øverste felt.
-Klik encode, og kopier værdien fra nederste felt.
+For eksempel: "basic API_KEY:uieyviu9o7459o8looi4vway"
+Det sætter du ind i *Text to encode* og klikker *Encode..*
+<img width="1030" height="359" alt="image" src="https://github.com/user-attachments/assets/068c3758-780d-4c8a-a575-8c8aa4a0121f" />
+
 Værdien sætter du ind i API Key feltet så det ser sådan ud:
 
 <img width="426" height="369" alt="image" src="https://github.com/user-attachments/assets/806d4d49-a80e-4105-ae67-f527f698f874" />
