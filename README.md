@@ -105,7 +105,7 @@ For eksempel: "API_KEY:uieyviu9o7459o8looi4vway"
 Det sætter du ind i *Text to encode* og klikker *Encode..*
 <img width="1030" height="359" alt="image" src="https://github.com/user-attachments/assets/068c3758-780d-4c8a-a575-8c8aa4a0121f" />
 
-I API key feltet indsætter du "basic " og din encodede nøgle. f.eks. "basic æoiuoaewtvoiwlaeyoiuwageroiuycsefluk":
+I API key feltet indsætter du "basic " og din encodede nøgle. f.eks. "basic oiuoaewtvoiwlaeyoiuwageroiuycsefluk=":
 
 <img width="426" height="369" alt="image" src="https://github.com/user-attachments/assets/806d4d49-a80e-4105-ae67-f527f698f874" />
 
