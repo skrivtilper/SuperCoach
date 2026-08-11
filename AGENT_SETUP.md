@@ -1,118 +1,151 @@
 # LLM / Agent setup-protokol
 
-Dette dokument er skrevet **til en LLM eller agent**, der hjælper en bruger med at sætte Pers supercoach op fra dette repository.
+Denne side er **til en LLM/agent**, der sætter Pers supercoach op for en bruger.
 
-Målet er at gennemføre så meget som muligt selv og kun bede brugeren om handlinger, som agenten ikke kan udføre eller udlede sikkert.
+Målet: gør selv alt, værktøjerne tillader, og bed kun brugeren om handlinger, agenten ikke kan udføre sikkert.
 
-## Før du går i gang
+## Standard og fallback
 
-1. Læs [`Instruks.md`](Instruks.md) i sin helhed.
-2. Antag **aldrig**, at ejeren af dette kilde-repository også er ejer af brugerens private persistent-repository.
-3. Bed aldrig brugeren om at indsætte API-nøgler, PATs eller andre secrets direkte i chatten.
-4. Genbrug eksisterende konfiguration og data, hvis de allerede findes. Opret ikke parallelle repositories eller dubletter.
+Standard:
+- Intervals.icu = profil, aktiviteter, events, wellness og training plan.
+- GitHub = langsigtet plan og varige noter.
 
-## Det skal du forsøge at gøre selv
+Hvis brugeren **specifikt ikke ønsker GitHub**, bruges fil-mode med `supercoach_memory.md`.
 
-Gør følgende uden at spørge om lov, når dine værktøjer og tilladelser gør det muligt:
+Hvis brugeren mangler Intervals.icu eller GitHub, skal agenten hjælpe brugeren i gang trin for trin i stedet for blot at stoppe.
 
-1. Kontrollér at Intervals.icu-forbindelsen virker ved at hente atletprofilen.
-2. Find den autentificerede GitHub-bruger/organisation eller et allerede eksisterende persistent-repository, hvis det kan udledes entydigt.
-3. Find eller verificér et privat persistent-repository. Standardnavnet er `SuperCoachPersistent`, men et andet navn er tilladt.
-4. Kontrollér at GitHub-forbindelsen har **Contents: Read and write** til det valgte persistent-repository.
-5. Læs eller initialisér:
-   - `maal_og_langsigtet_plan.md`
-   - `noter.md`
-6. Kontrollér Intervals-data:
-   - profil
-   - training plan
-   - wellness for de seneste 14 dage
-   - aktiviteter for de seneste 90 dage
-   - events fra 60 dage tilbage til 28 dage frem
-7. Del store `listActivities`/`listEvents`-perioder i mindre bidder, hvis svaret bliver for stort.
-8. Bevar eksisterende data og struktur; initialisér kun manglende filer.
-9. Afslut opsætningen med en kort status: hvad virker, hvad blev oprettet, og hvad mangler eventuelt.
+Læs altid [`Instruks.md`](Instruks.md) først. Bed aldrig brugeren indsætte API-nøgler, PATs eller andre secrets i chatten.
 
-## Det må du bede brugeren om
+## Onboarding-beslutning
 
-Spørg kun om oplysninger eller handlinger, du ikke selv kan udlede eller udføre.
+### Har brugeren Intervals.icu + GitHub?
+Verificér begge forbindelser og fortsæt.
 
-### GitHub-owner
+### Mangler brugeren Intervals.icu?
+Hjælp brugeren med at:
+1. oprette en Intervals.icu-konto
+2. færdiggøre basisprofilen
+3. forbinde relevante aktivitetskilder, hvis ønsket
+4. etablere sikker API/connector-adgang
+5. vende tilbage, når forbindelsen er klar
 
-Hvis `persistent_owner` ikke kan udledes entydigt, spørg:
+Forklar næste konkrete handling i små trin. Brugeren håndterer selv login, email-verifikation, MFA/2FA, captcha, samtykke, betaling og secrets.
 
-> Hvilken GitHub-bruger eller organisation skal eje dit private SuperCoachPersistent-repo?
+Når forbindelsen findes, verificerer agenten selv med `getAthleteProfile`. Manglende historik på en ny konto er ikke en fejl.
 
-Brug svaret som `persistent_owner`. Hardcod aldrig en bestemt persons GitHub-navn i den generelle opsætning.
+### Mangler brugeren GitHub?
+Forklar kort, at GitHub anbefales pga. versionshistorik, rollback, portabilitet og robust langtidslagring.
 
-### Persistent repo
+Hjælp derefter med:
+1. GitHub-konto
+2. sikker forbindelse til agenten
+3. privat persistent-repo, standard `SuperCoachPersistent`
+4. **Contents: Read and write**
+5. initialisering af plan/noter
 
-Hvis der ikke findes et relevant repo:
+Hvis agenten kan udføre et trin selv, skal den gøre det. Hvis ikke, bed kun brugeren om det konkrete manglende trin.
 
-- Hvis du kan oprette repositories: opret et **privat** repo, som standard `SuperCoachPersistent`.
-- Hvis du ikke kan oprette repositories: bed brugeren oprette et privat repo og oplyse owner + repo-navn.
+Hvis brugeren siger, at GitHub **ikke ønskes**, skift til fil-mode.
 
-### GitHub-adgang
+## Fil-mode uden GitHub
 
-Hvis GitHub kan læse men ikke skrive, bed brugeren opdatere integrationen/tokenet, så det valgte persistent-repository har:
-
-- **Contents: Read and write**
-
-Bed ikke om selve token-værdien.
-
-### Intervals.icu-adgang
-
-Hvis Intervals.icu ikke er autentificeret, bed brugeren forbinde eller konfigurere Intervals.icu-actionen via den sikre autentificeringsmekanisme.
-
-Bed ikke om API-nøglen i chatten.
-
-### Træningsmål
-
-Spørg kun om mål, tidsbegrænsninger, skader eller præferencer, hvis de ikke allerede findes i Intervals, planfilen eller `noter.md`, og hvis de er nødvendige for den næste konkrete planlægningsopgave.
-
-## Hvis du hjælper med at bygge en Custom GPT / agent
-
-Brug [`Instruks.md`](Instruks.md) som canonical runtime-instruks.
-
-Konfigurér disse værdier til brugerens installation:
+Konfiguration:
 
 ```text
+storage_mode = file
+memory_file = supercoach_memory.md
+```
+
+Agenten vedligeholder én fil direkte i agentens/workspacets filområde:
+
+```markdown
+# SuperCoach memory
+
+## Mål og langsigtet plan
+- mål
+- faser
+- strategi
+- ugeplan-skabeloner
+
+## Varige noter
+- profil
+- constraints
+- skader/helbred
+- præferencer
+- regler
+- større beslutninger
+```
+
+Filen erstatter `maal_og_langsigtet_plan.md` + `noter.md`. Intervals.icu forbliver sandhed for faktiske træningsdata.
+
+Fortæl brugeren én gang under onboarding, at fil-mode har ulemper:
+- persistence afhænger af platformen og er ikke garanteret mellem alle chats/agenter
+- ingen normal Git-versionhistorik/rollback
+- filen kan skulle genvedhæftes/vælges
+- synkronisering er mere manuel
+- en lokal backup anbefales
+
+Opdatér altid den samme fil. Hvis platformen ikke kan bevare den permanent, giv den opdaterede fil tilbage efter varige ændringer.
+
+## Det gør agenten selv
+
+1. Verificér Intervals med `getAthleteProfile`.
+2. Fastslå `storage_mode`: `github` som standard; `file` kun ved eksplicit GitHub-fravalg.
+3. GitHub-mode:
+   - udled eller spørg om `persistent_owner`
+   - find/opret privat persistent-repo
+   - kontrollér read/write
+   - læs/initialisér `maal_og_langsigtet_plan.md` + `noter.md`
+4. Fil-mode:
+   - find/opret `supercoach_memory.md`
+   - læs hele filen før ændringer
+   - opdatér samme fil
+5. Kontrollér Intervals: profil, training plan, 14 dages wellness, 90 dages aktiviteter og events fra -60 til +28 dage.
+6. Split `listActivities`/`listEvents` i mindre datobidder ved for store svar.
+7. Bevar eksisterende data; initialisér kun det manglende.
+8. Afslut med kort status: forbindelser, storage-mode, oprettet data og evt. mangler.
+
+## Det må agenten bede brugeren om
+
+Kun ting den ikke selv kan udlede eller udføre.
+
+Hvis `persistent_owner` ikke kan udledes:
+> Hvilken GitHub-bruger eller organisation skal eje dit private SuperCoachPersistent-repo?
+
+Hvis GitHub kan læse men ikke skrive: bed brugeren give det valgte repo **Contents: Read and write**. Bed ikke om token-værdien.
+
+Hvis Intervals ikke er autentificeret: hjælp med konto hvis nødvendigt og derefter sikker forbindelse. Bed ikke om API-nøglen i chatten.
+
+Spørg kun om træningsmål, skader, tidsbegrænsninger eller præferencer, hvis de ikke allerede findes og er nødvendige for næste opgave.
+
+## Runtime-konfiguration
+
+GitHub-mode:
+
+```text
+storage_mode = github
 persistent_owner = <brugerens GitHub-bruger eller organisation>
 persistent_repo = SuperCoachPersistent
 ```
 
-Et andet repo-navn er tilladt.
+Fil-mode:
 
-Tilføj de nødvendige Intervals.icu- og GitHub Contents-actions fra dette repository. Sørg for sikker authentication og mindst mulige nødvendige rettigheder.
-
-## Initialisering af persistent data
-
-Hvis `maal_og_langsigtet_plan.md` mangler, opret en enkel markdown-plan med sektioner for mål, faser, strategi og ugeplan-skabelon.
-
-Hvis `noter.md` mangler, opret:
-
-```json
-{
-  "schema_version": 1,
-  "profile": {},
-  "constraints": { "time": [], "injuries": [], "health": [] },
-  "preferences": { "running": [], "cycling": [], "general": [] },
-  "rules": [],
-  "major_decisions": []
-}
+```text
+storage_mode = file
+memory_file = supercoach_memory.md
 ```
 
-Skriv ikke løbende ugeevalueringer ind i planfilen; brug Intervals NOTE-events og evt. `noter.md` efter reglerne i `Instruks.md`.
+Tilføj Intervals-actions i begge modes. Tilføj kun GitHub Contents-actions i GitHub-mode.
 
 ## Definition of done
 
 Opsætningen er færdig, når:
+- `getAthleteProfile` virker
+- `storage_mode` er kendt
+- GitHub-mode: persistent repo kan læses/skrives, og plan/noter findes
+- fil-mode: `supercoach_memory.md` kan læses/opdateres, og brugeren kender backup-begrænsningen
+- centrale Intervals-endpoints er verificeret
+- ingen secrets er delt i chatten
+- brugeren får en kort status
 
-- Intervals.icu kan læses.
-- `persistent_owner` og `persistent_repo` er kendt.
-- GitHub persistent-repo kan læses og skrives.
-- plan- og notefiler findes og kan læses.
-- agenten har verificeret de centrale Intervals-endpoints.
-- ingen secrets er blevet delt i chatten.
-- brugeren får en kort opsummering af den aktive opsætning.
-
-Hvis noget blokerer opsætningen, nævn kun den konkrete brugerhandling, der mangler, og fortsæt selv med resten.
+Hvis noget blokerer, nævn kun den konkrete brugerhandling, der mangler, og fortsæt selv med resten.
