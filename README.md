@@ -1,10 +1,12 @@
 # 🧠 Pers supercoach — opsætningsguide
 
+> 🤖 **LLM eller agent? Start her:** Læs [`AGENT_SETUP.md`](AGENT_SETUP.md) først. Den beskriver præcist, hvad du selv skal gøre, hvad du må bede brugeren om, og hvornår opsætningen er færdig.
+
 Pers supercoach er en personlig træningsassistent til løb og cykling med:
 
 - **Intervals.icu** som sandhed for træningsdata, events, wellness og training plan.
 - **GitHub** som varig hukommelse for langsigtet plan og coach-noter.
-- En canonical instruktion i [`Instruks.md`](Instruks.md).
+- En canonical runtime-instruks i [`Instruks.md`](Instruks.md).
 
 Den anbefalede opsætning bruger én arkitektur: **Intervals.icu + et privat GitHub-repository til plan og noter**.
 
@@ -24,30 +26,48 @@ Bruges til:
 
 ### Privat GitHub-repository
 
-Standardopsætningen i `Instruks.md` forventer:
+Standardopsætningen i `Instruks.md` bruger:
 
-- owner: `skrivtilper`
-- repo: `SuperCoachPersistent`
+- owner: brugerens GitHub-bruger eller organisation (`persistent_owner`)
+- repo: `SuperCoachPersistent` som standard (`persistent_repo`)
 - plan: `maal_og_langsigtet_plan.md`
 - noter: `noter.md`
+
+Owner er **ikke** hardcoded. Den skal udledes fra brugerens GitHub-forbindelse eller vælges under opsætningen.
 
 Planfilen indeholder mål, faser, strategi og ugeplan-skabeloner. `noter.md` indeholder korte, varige regler, præferencer, skadeshistorik og større beslutninger.
 
 ---
 
-## 2. Opret din GPT
+## 2. Hurtigste opsætning med en LLM/Agent
 
-1. Opret eller redigér din Custom GPT i ChatGPT.
-2. Kopiér hele indholdet af [`Instruks.md`](Instruks.md) ind under **Instructions**.
-3. Tilføj Intervals.icu-actions.
-4. Tilføj GitHub Contents-actions.
-5. Gem og test.
+Giv agenten linket til dette repository og bed fx:
 
-`Instruks.md` er den eneste canonical instruks i dette repository.
+```text
+Hjælp mig med at sætte Pers supercoach op efter repositoryets agent-guide.
+```
+
+Agenten skal derefter følge [`AGENT_SETUP.md`](AGENT_SETUP.md): selv verificere det, den har adgang til, og kun bede dig om de få handlinger eller oplysninger, den ikke kan udføre eller udlede.
+
+Du skal **ikke** indsætte API-nøgler eller GitHub-tokens i chatten.
 
 ---
 
-## 3. Intervals.icu-actions
+## 3. Opret din Custom GPT / agent manuelt
+
+1. Opret eller redigér din Custom GPT/agent.
+2. Kopiér hele indholdet af [`Instruks.md`](Instruks.md) ind under dens runtime-instruktioner.
+3. Konfigurér `persistent_owner` til din GitHub-bruger eller organisation.
+4. Behold `persistent_repo = "SuperCoachPersistent"` eller vælg et andet privat repo-navn.
+5. Tilføj Intervals.icu-actions.
+6. Tilføj GitHub Contents-actions.
+7. Gem og test.
+
+`Instruks.md` er den eneste canonical runtime-instruks i dette repository.
+
+---
+
+## 4. Intervals.icu-actions
 
 Importér OpenAPI-filen:
 
@@ -75,11 +95,11 @@ Den indeholder bl.a.:
 3. Opret en API key.
 4. Konfigurér actionens authentication efter OpenAPI-definitionen.
 
-Del aldrig API-nøglen offentligt.
+Del aldrig API-nøglen offentligt eller direkte i chatten.
 
 ---
 
-## 4. GitHub-actions
+## 5. GitHub-actions
 
 Importér GitHub Contents OpenAPI-filen:
 
@@ -96,21 +116,21 @@ De centrale handlinger er:
 
 ### GitHub Personal Access Token
 
-Opret et fine-grained PAT med adgang til det private repository, som indeholder plan og noter.
+Opret et fine-grained PAT med adgang til det **private persistent-repository**, du vil bruge til plan og noter.
 
 Nødvendig repository permission:
 
 - **Contents: Read and write**
 
-Hvis GPT'en også skal kunne vedligeholde dette `SuperCoach`-repo direkte, skal tokenet have samme adgang til `skrivtilper/SuperCoach`.
+Tilføj tokenet som Bearer-token i GitHub-actionens sikre authentication. Del aldrig tokenet i chat eller offentligt.
 
-Tilføj tokenet som Bearer-token i GitHub-actionens authentication. Del aldrig tokenet i chat eller offentligt.
+Hvis agenten også skal kunne vedligeholde selve dette kilde-repository, kræver det separat skriveadgang til det repository; det er ikke nødvendigt for almindelig trænerbrug.
 
 ---
 
-## 5. Persistent data
+## 6. Persistent data
 
-I `SuperCoachPersistent` skal disse filer findes:
+I dit valgte private persistent-repository skal disse filer findes:
 
 ### `maal_og_langsigtet_plan.md`
 
@@ -148,9 +168,11 @@ Løbende ugeevalueringer hører ikke hjemme her.
 
 Intervals NOTE-events bruges til datonære beslutninger og ugefeedback.
 
+Agenten kan initialisere begge filer, hvis dens GitHub-værktøjer har skriveadgang.
+
 ---
 
-## 6. Test opsætningen
+## 7. Test opsætningen
 
 Start en ny chat og bed fx:
 
@@ -160,25 +182,26 @@ Hent min profil og giv mig et kort overblik over den seneste uges træning.
 
 Kontrollér at coachen:
 
-1. læser plan og noter fra GitHub
-2. kan hente Intervals-profilen
-3. kan hente aktiviteter/events
-4. kan læse wellness
-5. kan læse training plan
-6. håndterer store aktivitet/event-svar ved at dele datointervallet op
-7. ikke opretter dubletter ved gentagne planændringer
+1. fastslår dit persistent GitHub-repo
+2. læser plan og noter fra GitHub
+3. kan hente Intervals-profilen
+4. kan hente aktiviteter/events
+5. kan læse wellness
+6. kan læse training plan
+7. håndterer store aktivitet/event-svar ved at dele datointervallet op
+8. ikke opretter dubletter ved gentagne planændringer
 
 Test derefter en ufarlig fremtidig workout-oprettelse og kontrollér, at `external_id` bruges.
 
 ---
 
-## 7. Fejlfinding
+## 8. Fejlfinding
 
 ### GitHub giver 403 ved skrivning
 
 Kontrollér:
 
-- at PAT'et har adgang til det konkrete repository
+- at PAT'et har adgang til det konkrete private persistent-repository
 - at **Contents: Read and write** er slået til
 - at actionen bruger det rigtige token
 
@@ -192,9 +215,10 @@ Planfilen har prioritet for mål og strategi. `noter.md` skal opryddes/opdateres
 
 ---
 
-## 8. Filer i dette repository
+## 9. Filer i dette repository
 
-- [`Instruks.md`](Instruks.md) — canonical GPT-instruks.
+- [`AGENT_SETUP.md`](AGENT_SETUP.md) — installationsprotokol for LLM/agent.
+- [`Instruks.md`](Instruks.md) — canonical runtime-instruks.
 - [`openAPI intervals_icu.yaml`](openAPI%20intervals_icu.yaml) — Intervals.icu actions.
 - [`github-contents-openapi.yaml`](github-contents-openapi.yaml) — GitHub Contents actions.
 - [`maal_og_langsigtet_plan.md`](maal_og_langsigtet_plan.md) — skabelon/reference til langsigtet plan.
