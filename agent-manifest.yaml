@@ -1,0 +1,69 @@
+name: Pers supercoach
+purpose: Personal running and cycling coach using Intervals.icu plus persistent memory.
+
+agent_entrypoint: AGENT_SETUP.md
+runtime_instructions: Instruks.md
+
+bootstrap:
+  intent_examples:
+    - "Her er repoet, sæt det op for mig"
+    - "Set this repo up for me"
+  behavior: start_immediately
+  do_not_ask_generic_setup_questions: true
+  ask_only_when_blocked: true
+  ask_one_blocker_at_a_time: true
+  prefer_capability_detection_over_questions: true
+
+defaults:
+  timezone: Europe/Copenhagen
+  storage_mode: github
+  persistent_repo_name: SuperCoachPersistent
+
+storage_modes:
+  github:
+    recommended: true
+    requires:
+      - github_contents_read
+      - github_contents_write
+    live_files:
+      plan: maal_og_langsigtet_plan.md
+      notes: noter.md
+  file:
+    recommended: false
+    activate_only_when_user_explicitly_declines_github: true
+    memory_file: supercoach_memory.md
+
+capabilities:
+  intervals:
+    required: true
+    spec: "openAPI intervals_icu.yaml"
+    verify_with: getAthleteProfile
+  github_contents:
+    required_when: "storage_mode == github"
+    spec: github-contents-openapi.yaml
+
+source_resources:
+  long_term_plan_template: templates/maal_og_langsigtet_plan.md
+  file_memory_template: templates/supercoach_memory.md
+  archived_instructions:
+    - "archive/Instruks med plan i GitHub.md"
+
+security:
+  never_request_secrets_in_chat: true
+  user_handles:
+    - login
+    - email_verification
+    - mfa
+    - captcha
+    - consent
+    - payment
+    - secret_values
+
+setup_success:
+  intervals_profile_readable: true
+  storage_mode_known: true
+  persistent_storage_readable: true
+  persistent_storage_writable: true
+  idempotence_smoke_test_passed_or_cleanup_limitation_reported: true
+  no_secrets_shared_in_chat: true
+  user_receives_short_ready_status: true
