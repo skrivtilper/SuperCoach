@@ -1,41 +1,51 @@
 # 🧠 Pers supercoach — opsætningsguide
 
-> 🤖 **LLM eller agent? Start her:** Læs [`AGENT_SETUP.md`](AGENT_SETUP.md) først. Den beskriver præcist, hvad du selv skal gøre, hvad du må bede brugeren om, og hvornår opsætningen er færdig.
+> 🤖 **LLM eller agent? Start her:** Læs [`AGENT_SETUP.md`](AGENT_SETUP.md) først. Den beskriver præcist, hvad agenten selv skal gøre, hvad brugeren skal guides igennem, og hvordan setup håndteres, hvis brugeren endnu ikke har Intervals.icu eller GitHub.
 
 Pers supercoach er en personlig træningsassistent til løb og cykling med:
 
 - **Intervals.icu** som sandhed for træningsdata, events, wellness og training plan.
-- **GitHub** som varig hukommelse for langsigtet plan og coach-noter.
+- **GitHub** som anbefalet langtidslager for plan og coach-noter.
+- **Filbaseret fallback**, hvis brugeren specifikt ikke ønsker GitHub.
 - En canonical runtime-instruks i [`Instruks.md`](Instruks.md).
-
-Den anbefalede opsætning bruger én arkitektur: **Intervals.icu + et privat GitHub-repository til plan og noter**.
 
 ---
 
-## 1. Arkitektur
+## 1. To storage-modes
 
-### Intervals.icu
+### Anbefalet: GitHub-mode
 
-Bruges til:
+```text
+storage_mode = github
+persistent_owner = <brugerens GitHub-bruger eller organisation>
+persistent_repo = SuperCoachPersistent
+```
 
-- atletprofil
-- gennemførte aktiviteter
-- planlagte WORKOUT- og NOTE-events
-- wellness
-- training plan
+Det private persistent-repository indeholder:
 
-### Privat GitHub-repository
+- `maal_og_langsigtet_plan.md`
+- `noter.md`
 
-Standardopsætningen i `Instruks.md` bruger:
+GitHub anbefales, fordi det giver versionshistorik, rollback, portabilitet og mere robust persistence på tværs af chats/agenter.
 
-- owner: brugerens GitHub-bruger eller organisation (`persistent_owner`)
-- repo: `SuperCoachPersistent` som standard (`persistent_repo`)
-- plan: `maal_og_langsigtet_plan.md`
-- noter: `noter.md`
+### Fallback: fil-mode
 
-Owner er **ikke** hardcoded. Den skal udledes fra brugerens GitHub-forbindelse eller vælges under opsætningen.
+Hvis brugeren **specifikt ikke ønsker GitHub**:
 
-Planfilen indeholder mål, faser, strategi og ugeplan-skabeloner. `noter.md` indeholder korte, varige regler, præferencer, skadeshistorik og større beslutninger.
+```text
+storage_mode = file
+memory_file = supercoach_memory.md
+```
+
+Agenten vedligeholder én fil direkte i agentens/workspacets filområde. Filen indeholder både langsigtet plan og varige noter.
+
+Ulemper:
+
+- persistence afhænger af den konkrete platform og er ikke nødvendigvis garanteret mellem nye chats/agenter
+- ingen normal Git-versionhistorik/rollback
+- filen kan skulle vedhæftes eller vælges igen
+- synkronisering mellem enheder/agenter er mere manuel
+- brugeren bør beholde en backup
 
 ---
 
@@ -47,27 +57,79 @@ Giv agenten linket til dette repository og bed fx:
 Hjælp mig med at sætte Pers supercoach op efter repositoryets agent-guide.
 ```
 
-Agenten skal derefter følge [`AGENT_SETUP.md`](AGENT_SETUP.md): selv verificere det, den har adgang til, og kun bede dig om de få handlinger eller oplysninger, den ikke kan udføre eller udlede.
+Agenten skal derefter følge [`AGENT_SETUP.md`](AGENT_SETUP.md).
 
-Du skal **ikke** indsætte API-nøgler eller GitHub-tokens i chatten.
+Den skal **ikke** forudsætte, at du allerede har GitHub eller Intervals.icu:
+
+- Mangler du **Intervals.icu**, skal agenten guide dig trin for trin til at oprette og forbinde en konto.
+- Mangler du **GitHub**, skal agenten tilbyde at hjælpe dig i gang med konto, privat persistent-repo og sikker forbindelse.
+- Ønsker du **ikke GitHub**, skal agenten skifte til fil-mode og forklare begrænsningerne.
+
+Du skal ikke indsætte API-nøgler, GitHub-tokens eller andre secrets direkte i chatten.
 
 ---
 
-## 3. Opret din Custom GPT / agent manuelt
+## 3. Arkitektur
+
+### Intervals.icu
+
+Bruges til:
+
+- atletprofil
+- gennemførte aktiviteter
+- planlagte WORKOUT- og NOTE-events
+- wellness
+- training plan
+
+### Persistent storage
+
+I GitHub-mode:
+
+- `maal_og_langsigtet_plan.md` → mål, faser, strategi og ugeplan-skabeloner
+- `noter.md` → varige regler, præferencer, skadeshistorik og større beslutninger
+
+I fil-mode:
+
+- `supercoach_memory.md` → kombinerer begge funktioner
+
+---
+
+## 4. Manuel opsætning af en Custom GPT / agent
 
 1. Opret eller redigér din Custom GPT/agent.
-2. Kopiér hele indholdet af [`Instruks.md`](Instruks.md) ind under dens runtime-instruktioner.
-3. Konfigurér `persistent_owner` til din GitHub-bruger eller organisation.
-4. Behold `persistent_repo = "SuperCoachPersistent"` eller vælg et andet privat repo-navn.
-5. Tilføj Intervals.icu-actions.
-6. Tilføj GitHub Contents-actions.
-7. Gem og test.
+2. Kopiér hele [`Instruks.md`](Instruks.md) ind som runtime-instruks.
+3. Vælg storage-mode.
+4. Tilføj Intervals.icu-actions.
+5. Tilføj GitHub Contents-actions, hvis GitHub-mode bruges.
+6. Konfigurér sikker authentication.
+7. Test setup.
 
-`Instruks.md` er den eneste canonical runtime-instruks i dette repository.
+### GitHub-mode
+
+Konfigurér:
+
+```text
+storage_mode = github
+persistent_owner = <din GitHub-bruger eller organisation>
+persistent_repo = SuperCoachPersistent
+```
+
+Owner er **ikke hardcoded** og behøver ikke være samme owner som dette offentlige kilde-repository.
+
+### Fil-mode
+
+Konfigurér:
+
+```text
+storage_mode = file
+memory_file = supercoach_memory.md
+```
+
+Tilføj ikke GitHub-actions, hvis GitHub bevidst er fravalgt.
 
 ---
 
-## 4. Intervals.icu-actions
+## 5. Intervals.icu-actions
 
 Importér OpenAPI-filen:
 
@@ -88,18 +150,21 @@ Den indeholder bl.a.:
 - `getAthleteTrainingPlan`
 - `setAthleteTrainingPlan`
 
-### Intervals API-key
+### Hvis brugeren ikke har Intervals.icu
 
-1. Log ind på Intervals.icu.
-2. Gå til Settings → Developer settings.
-3. Opret en API key.
-4. Konfigurér actionens authentication efter OpenAPI-definitionen.
+Agenten skal hjælpe med onboarding frem for blot at stoppe:
 
-Del aldrig API-nøglen offentligt eller direkte i chatten.
+1. opret konto
+2. færdiggør basisprofil
+3. forbind relevante aktivitetskilder, hvis ønsket
+4. etabler sikker API/connector-adgang
+5. verificér med `getAthleteProfile`
+
+Login, email-verifikation, MFA, captcha, samtykke og secrets håndteres af brugeren selv.
 
 ---
 
-## 5. GitHub-actions
+## 6. GitHub-actions
 
 Importér GitHub Contents OpenAPI-filen:
 
@@ -107,45 +172,49 @@ Importér GitHub Contents OpenAPI-filen:
 https://github.com/skrivtilper/SuperCoach/raw/main/github-contents-openapi.yaml
 ```
 
-De centrale handlinger er:
+Centrale handlinger:
 
 - `getFileContents`
 - `putFileContents`
 - `getRepo`
 - `listCommitsForPath`
 
-### GitHub Personal Access Token
+### GitHub-adgang
 
-Opret et fine-grained PAT med adgang til det **private persistent-repository**, du vil bruge til plan og noter.
-
-Nødvendig repository permission:
+Til brugerens **private persistent-repository** kræves repository permission:
 
 - **Contents: Read and write**
 
-Tilføj tokenet som Bearer-token i GitHub-actionens sikre authentication. Del aldrig tokenet i chat eller offentligt.
+Bed aldrig brugeren dele selve token-værdien i chatten.
 
-Hvis agenten også skal kunne vedligeholde selve dette kilde-repository, kræver det separat skriveadgang til det repository; det er ikke nødvendigt for almindelig trænerbrug.
+Hvis agenten også skal vedligeholde selve dette kilde-repository, kræver det separat relevant adgang til kilde-repositoryet.
+
+### Hvis brugeren ikke har GitHub
+
+Agenten skal tilbyde at hjælpe brugeren gennem:
+
+1. konto-oprettelse
+2. sikker forbindelse til agenten
+3. oprettelse/valg af privat persistent-repo
+4. read/write-adgang
+5. initialisering af plan og noter
+
+Hvis brugeren siger, at GitHub ikke ønskes, bruges fil-mode i stedet.
 
 ---
 
-## 6. Persistent data
+## 7. Persistent data
 
-I dit valgte private persistent-repository skal disse filer findes:
+### GitHub-mode
 
-### `maal_og_langsigtet_plan.md`
-
-Indeholder:
+`maal_og_langsigtet_plan.md` indeholder:
 
 - mål
 - faser
 - strategi
 - ugeplan-skabeloner
 
-Løbende ugeevalueringer hører ikke hjemme her.
-
-### `noter.md`
-
-Én JSON-struktur:
+`noter.md` er ét JSON-objekt:
 
 ```json
 {
@@ -166,13 +235,33 @@ Løbende ugeevalueringer hører ikke hjemme her.
 }
 ```
 
-Intervals NOTE-events bruges til datonære beslutninger og ugefeedback.
+### Fil-mode
 
-Agenten kan initialisere begge filer, hvis dens GitHub-værktøjer har skriveadgang.
+`supercoach_memory.md` bør mindst indeholde:
+
+```markdown
+# SuperCoach memory
+
+## Mål og langsigtet plan
+- mål
+- faser
+- strategi
+- ugeplan-skabeloner
+
+## Varige noter
+- profil
+- constraints
+- skader/helbred
+- præferencer
+- regler
+- større beslutninger
+```
+
+Intervals NOTE-events bruges fortsat til datonære beslutninger og ugefeedback.
 
 ---
 
-## 7. Test opsætningen
+## 8. Test opsætningen
 
 Start en ny chat og bed fx:
 
@@ -182,50 +271,48 @@ Hent min profil og giv mig et kort overblik over den seneste uges træning.
 
 Kontrollér at coachen:
 
-1. fastslår dit persistent GitHub-repo
-2. læser plan og noter fra GitHub
-3. kan hente Intervals-profilen
+1. kan læse Intervals-profilen
+2. fastslår korrekt storage-mode
+3. kan læse persistent plan/noter eller memory-fil
 4. kan hente aktiviteter/events
 5. kan læse wellness
 6. kan læse training plan
-7. håndterer store aktivitet/event-svar ved at dele datointervallet op
-8. ikke opretter dubletter ved gentagne planændringer
-
-Test derefter en ufarlig fremtidig workout-oprettelse og kontrollér, at `external_id` bruges.
+7. håndterer store svar ved at dele datointervaller op
+8. bruger `external_id` uden at skabe dubletter
 
 ---
 
-## 8. Fejlfinding
+## 9. Fejlfinding
 
 ### GitHub giver 403 ved skrivning
 
 Kontrollér:
 
-- at PAT'et har adgang til det konkrete private persistent-repository
+- at integrationen/tokenet har adgang til det valgte private persistent-repository
 - at **Contents: Read and write** er slået til
-- at actionen bruger det rigtige token
+- at actionen bruger den rigtige authentication
 
 ### Store svar fra Intervals
 
-`listActivities` og `listEvents` kan blive for store over lange perioder. Instruksen fortæller coachen at dele perioden i mindre bidder, typisk 14–30 dage.
+`listActivities` og `listEvents` kan blive for store over lange perioder. Runtime-instruksen kræver, at agenten automatisk deler perioden i mindre bidder, typisk 14–30 dage.
 
-### Plan og noter er uenige
+### Fil-mode mister memory mellem chats
 
-Planfilen har prioritet for mål og strategi. `noter.md` skal opryddes/opdateres, så den matcher den aktuelle plan.
+Det er en kendt begrænsning ved filbaseret fallback. Genvedhæft/vælg den seneste `supercoach_memory.md`, eller skift til GitHub-mode for mere robust persistence.
 
 ---
 
-## 9. Filer i dette repository
+## 10. Filer i dette repository
 
 - [`AGENT_SETUP.md`](AGENT_SETUP.md) — installationsprotokol for LLM/agent.
 - [`Instruks.md`](Instruks.md) — canonical runtime-instruks.
 - [`openAPI intervals_icu.yaml`](openAPI%20intervals_icu.yaml) — Intervals.icu actions.
 - [`github-contents-openapi.yaml`](github-contents-openapi.yaml) — GitHub Contents actions.
-- [`maal_og_langsigtet_plan.md`](maal_og_langsigtet_plan.md) — skabelon/reference til langsigtet plan.
-- [`Instruks med plan i GitHub.md`](Instruks%20med%20plan%20i%20GitHub.md) — arkiveret tidligere instruks; brug `Instruks.md` i stedet.
+- [`maal_og_langsigtet_plan.md`](maal_og_langsigtet_plan.md) — reference/skabelon til langtidsplan.
+- [`Instruks med plan i GitHub.md`](Instruks%20med%20plan%20i%20GitHub.md) — arkiveret tidligere instruks.
 
 ---
 
 ## About
 
-Pers supercoach er bygget til korte, handlingsnære træningsbeslutninger med Intervals.icu som datakilde og GitHub som vedvarende strategisk hukommelse.
+Pers supercoach er bygget til korte, handlingsnære træningsbeslutninger med Intervals.icu som datakilde og enten GitHub eller en fil som vedvarende strategisk hukommelse.
