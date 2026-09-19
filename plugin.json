@@ -24,7 +24,9 @@
           "Write"
         ],
         "websiteURL": "https://github.com/skrivtilper/SuperCoach",
-        "defaultPrompt": "Gennemgå min aktuelle træning og planlæg det næste passende skridt."
+        "defaultPrompt": [
+          "Gennemgå min aktuelle træning og planlæg det næste passende skridt."
+        ]
       }
     }
   }
