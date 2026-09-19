@@ -1,5 +1,7 @@
 # 🧠 Pers supercoach
 
+> 🔌 **ChatGPT plugin/MCP? Start her:** Læs [`PLUGIN_SETUP.md`](PLUGIN_SETUP.md). Plugin-laget består af [`plugin.json`](plugin.json), [`mcp.json`](mcp.json), [`skills/supercoach/`](skills/supercoach/) og [`mcp-server/`](mcp-server/).
+>
 > 🤖 **LLM/agent? Start her:** Læs [`agent-manifest.yaml`](agent-manifest.yaml) → [`AGENT_SETUP.md`](AGENT_SETUP.md) → [`Instruks.md`](Instruks.md).
 
 ## Den ønskede brugeroplevelse
@@ -38,6 +40,20 @@ Fil-mode er mindre robust: persistence afhænger af agent/platform, Git-historik
 
 ---
 
+## Plugin/MCP entrypoints
+
+| Fil/mappe | Formål |
+|---|---|
+| [`plugin.json`](plugin.json) | Portable plugin-manifest |
+| [`mcp.json`](mcp.json) | MCP-server declaration; URL sættes efter deployment |
+| [`skills/supercoach/`](skills/supercoach/) | Coach-skill med runtime- og setup-regler |
+| [`mcp-server/`](mcp-server/) | Streamable HTTP MCP-server for Intervals.icu + GitHub |
+| [`PLUGIN_SETUP.md`](PLUGIN_SETUP.md) | Deployment, secrets, smoke test og installation |
+
+Plugin-laget genbruger den samme træningsarkitektur som agent-filerne nedenfor. OpenAPI-filerne bevares som reference/legacy-integrationer.
+
+---
+
 ## Agent entrypoints
 
 | Fil | Formål |
@@ -69,7 +85,7 @@ OpenAPI-spec:
 Til brugerens **private persistent-repo** kræves normalt:
 - **Contents: Read and write**
 
-Owner er ikke hardcoded. Agenten skal udlede eller spørge efter brugerens GitHub-bruger/organisation.
+Owner er ikke hardcoded i de generiske agentfiler. Den single-user MCP-konfiguration kan derimod med vilje låses til én owner/repo via serverens miljøvariabler.
 
 Hvis brugeren ikke har GitHub, skal agenten tilbyde onboarding. Manglende GitHub-konto er ikke automatisk et valg af fil-mode.
 
@@ -97,7 +113,7 @@ Et setup afsluttes med en smoke test, der verificerer:
 4. At ingen secrets er delt i chatten.
 5. At ingen semantiske testdata efterlades.
 
-Detaljerne står i [`AGENT_SETUP.md`](AGENT_SETUP.md).
+Detaljerne står i [`AGENT_SETUP.md`](AGENT_SETUP.md) og, for plugin/MCP-vejen, i [`PLUGIN_SETUP.md`](PLUGIN_SETUP.md).
 
 ---
 
@@ -114,7 +130,7 @@ Agenten må give en “klar til brug”-status, når:
 
 ---
 
-## Manuel opsætning
+## Legacy/manual agent setup
 
 Hvis du bygger en Custom GPT/agent manuelt:
 
