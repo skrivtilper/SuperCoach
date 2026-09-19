@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "pers-supercoach",
+  "version": "0.1.0",
+  "description": "Personal running and cycling coach backed by Intervals.icu and durable GitHub memory.",
+  "repository": "https://github.com/skrivtilper/SuperCoach",
+  "license": "CC0-1.0",
+  "keywords": [
+    "running",
+    "cycling",
+    "training",
+    "intervals.icu",
+    "coaching"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Pers supercoach",
+        "shortDescription": "Løb- og cykelcoach med Intervals og varig plan.",
+        "longDescription": "Planlægger og evaluerer løb og cykling med Intervals.icu som datakilde og GitHub som varig hukommelse for mål, strategi og noter.",
+        "developerName": "skrivtilper",
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
+        "websiteURL": "https://github.com/skrivtilper/SuperCoach",
+        "defaultPrompt": "Gennemgå min aktuelle træning og planlæg det næste passende skridt."
+      }
+    }
+  }
+}
