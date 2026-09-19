@@ -25,8 +25,6 @@ validateStartup();
 
 const app = express();
 app.disable("x-powered-by");
-app.use(express.json({ limit: "1mb" }));
-
 app.get("/health", (_req, res) => {
   res.json({
     ok: true,
@@ -40,12 +38,11 @@ app.get("/health", (_req, res) => {
 
 const mcp = createMcpHandler(() => buildServer(), { responseMode: "auto", maxRequestBodySize: 1024 * 1024 });
 const nodeMcp = toNodeHandler(mcp, {
-  maxRequestBodySize: 1024 * 1024,
   onerror: (error) => console.error("MCP adapter error", error),
 });
 
-app.all("/mcp", mcpGuard, async (req, res) => {
-  await nodeMcp(req, res, req.body);
+app.all("/mcp", mcpGuard, (req, res) => {
+  void nodeMcp(req, res);
 });
 
 app.listen(PORT, HOST, () => console.log(`pers-supercoach-mcp listening on http://${HOST}:${PORT}`));
