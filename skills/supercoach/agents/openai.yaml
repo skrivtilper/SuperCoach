@@ -1,0 +1,12 @@
+interface:
+  display_name: "Pers supercoach"
+  short_description: "Løb- og cykelcoach med Intervals og varig GitHub-hukommelse."
+  default_prompt: "Gennemgå min aktuelle træning og planlæg det næste passende skridt."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "supercoach"
+      description: "Read and update Intervals.icu training data and persistent GitHub plan/notes."
+      transport: "streamable_http"
+      url: "https://replace-me.example/mcp"
